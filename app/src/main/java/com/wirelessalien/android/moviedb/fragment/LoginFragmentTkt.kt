@@ -96,6 +96,10 @@ class LoginFragmentTkt : BottomSheetDialogFragment() {
             lifecycleScope.launch {
                 val logoutManager = AccountLogoutTkt(requireContext(), Handler(Looper.getMainLooper()))
                 logoutManager.logout()
+                preferences.edit()
+                    .remove("is_logged_in")
+                    .remove("login_provider")
+                    .apply()
                 binding.login.visibility = View.VISIBLE
                 binding.logout.visibility = View.GONE
                 binding.loginStatus.setText(R.string.not_logged_in)
@@ -105,8 +109,14 @@ class LoginFragmentTkt : BottomSheetDialogFragment() {
         }
 
         binding.login.setOnClickListener {
+
+            preferences.edit()
+                .putLong("last_login_attempt", System.currentTimeMillis())
+                .apply()
+
             redirectToTraktAuthorization()
         }
+
 
         binding.changeProvider.setOnClickListener {
             dismiss()
@@ -115,6 +125,11 @@ class LoginFragmentTkt : BottomSheetDialogFragment() {
         }
 
         if (preferences.getString("trakt_access_token", null) != null) {
+
+            preferences.edit()
+                .putBoolean("is_logged_in", true)
+                .putString("login_provider", "Trakt")
+                .apply()
             lifecycleScope.launch {
                 val getAccountDetailsTkt = GetAccountDetailsTkt(requireContext(), clientId!!, object : GetAccountDetailsTkt.AccountDataCallback {
                     override fun onAccountDataReceived(username: String?, name: String?, avatarUrl: String?, location: String?, joinedAt: String?) {

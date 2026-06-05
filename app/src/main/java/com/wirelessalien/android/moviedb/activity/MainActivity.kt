@@ -20,6 +20,7 @@
 package com.wirelessalien.android.moviedb.activity
 
 
+import androidx.preference.PreferenceManager
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -66,7 +67,6 @@ import androidx.lifecycle.lifecycleScope
 import androidx.paging.LoadState
 import androidx.paging.Pager
 import androidx.paging.PagingConfig
-import androidx.preference.PreferenceManager
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.work.Constraints
@@ -138,6 +138,7 @@ import java.io.FileReader
 import java.io.IOException
 import java.util.concurrent.TimeUnit
 
+
 class MainActivity : BaseActivity() {
 
     private lateinit var preferences: SharedPreferences
@@ -145,7 +146,7 @@ class MainActivity : BaseActivity() {
     private lateinit var tmdbApiKey: String
     private var clientId: String? = null
     private var clientSecret: String? = null
-    private lateinit var context: Context
+    private lateinit var context:   Context
     private lateinit var binding: ActivityMainBinding
     private lateinit var prefListener: OnSharedPreferenceChangeListener
     private lateinit var settingsActivityResultLauncher: ActivityResultLauncher<Intent>
@@ -171,13 +172,24 @@ class MainActivity : BaseActivity() {
 
         context = this
 
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
+
+        val isLoggedIn = preferences.getBoolean("is_logged_in", false)
+        val loginProvider = preferences.getString("login_provider", "Unknown")
+
+        if (isLoggedIn) {
+            Log.d("LoginStatus", "User logged in with $loginProvider")
+        } else {
+            Log.d("LoginStatus", "User not logged in")
+        }
+
         val fileName = "Crash_Log.txt"
         val crashLogFile = File(filesDir, fileName)
         if (crashLogFile.exists()) {
             val crashLog = StringBuilder()
             try {
                 val reader = BufferedReader(FileReader(crashLogFile))
-                var line: String?
+                var line: String? = null
                 while (reader.readLine().also { line = it } != null) {
                     crashLog.append(line)
                     crashLog.append('\n')
@@ -220,7 +232,6 @@ class MainActivity : BaseActivity() {
         tmdbApiKey = ConfigHelper.getConfigValue(this, "api_key")?: ""
         clientId = ConfigHelper.getConfigValue(this, "client_id")
         clientSecret = ConfigHelper.getConfigValue(this, "client_secret")
-        preferences = PreferenceManager.getDefaultSharedPreferences(this)
         binding.bottomNavigation.setOnItemSelectedListener { item: MenuItem ->
             val itemId = item.itemId
             var selectedFragment: Fragment? = null
@@ -361,6 +372,8 @@ class MainActivity : BaseActivity() {
         mShowLinearLayoutManager = mShowGridView
 
         binding.searchResultsRecyclerView.adapter = mHomeSearchShowAdapter
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         setupSearchView()
 

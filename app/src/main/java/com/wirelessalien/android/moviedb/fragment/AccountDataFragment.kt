@@ -55,7 +55,20 @@ class AccountDataFragment : BaseFragment() {
         sessionId = sPreferences.getString("access_token", null)
         accountId = sPreferences.getString("account_id", null)
         activityBinding.fab.isEnabled = !(sessionId == null || accountId == null)
+        val isLoggedIn = sPreferences.getBoolean("is_logged_in", false)
+        val loginProvider = sPreferences.getString("login_provider", "Unknown")
 
+        if (isLoggedIn) {
+            android.util.Log.d(
+                "AccountStatus",
+                "User logged in with $loginProvider"
+            )
+        } else {
+            android.util.Log.d(
+                "AccountStatus",
+                "User not logged in"
+            )
+        }
         setupTabs()
         // After setupTabs, initialize the toggle button group state
         binding.tabs.getTabAt(0)?.select()
