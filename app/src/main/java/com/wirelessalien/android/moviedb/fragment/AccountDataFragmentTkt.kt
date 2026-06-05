@@ -83,6 +83,20 @@ class AccountDataFragmentTkt : BaseFragment() {
         super.onCreate(savedInstanceState)
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(requireContext())
         accessToken = sharedPreferences.getString("trakt_access_token", null)
+        val isLoggedIn = sharedPreferences.getBoolean("is_logged_in", false)
+        val loginProvider = sharedPreferences.getString("login_provider", "Unknown")
+
+        if (isLoggedIn) {
+            android.util.Log.d(
+                "TraktAccountStatus",
+                "Logged in with $loginProvider"
+            )
+        } else {
+            android.util.Log.d(
+                "TraktAccountStatus",
+                "User not logged in"
+            )
+        }
         clientId = ConfigHelper.getConfigValue(requireContext(), "client_id")
         tmdbApiKey = ConfigHelper.getConfigValue(requireContext(), "api_key")
 
@@ -95,6 +109,13 @@ class AccountDataFragmentTkt : BaseFragment() {
         binding = FragmentAccountDataTktBinding.inflate(inflater, container, false)
         val view = binding.root
         activityBinding = (activity as MainActivity).getBinding()
+        if (accessToken != null) {
+            activityBinding.fab.alpha = 1.0f
+            activityBinding.fab.isEnabled = true
+        } else {
+            activityBinding.fab.alpha = 0.5f
+            activityBinding.fab.isEnabled = false
+        }
 
         setupTabs()
 

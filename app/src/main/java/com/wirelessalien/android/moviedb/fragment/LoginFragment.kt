@@ -26,6 +26,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.widget.Toast
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -43,6 +44,7 @@ import com.wirelessalien.android.moviedb.tmdb.account.AccountLogout
 import com.wirelessalien.android.moviedb.tmdb.account.GetAccountDetails
 import com.wirelessalien.android.moviedb.tmdb.account.TMDbAuthV4
 import kotlinx.coroutines.launch
+
 
 class LoginFragment : BottomSheetDialogFragment() {
     private lateinit var preferences: SharedPreferences
@@ -97,6 +99,16 @@ class LoginFragment : BottomSheetDialogFragment() {
             lifecycleScope.launch {
                 val logoutManager = AccountLogout(requireContext(), Handler(Looper.getMainLooper()))
                 logoutManager.logout()
+                preferences.edit()
+                    .remove("access_token")
+                    .putBoolean("is_logged_in", false)
+                    .apply()
+
+                Toast.makeText(
+                    requireContext(),
+                    "Logout successful",
+                    Toast.LENGTH_SHORT
+                ).show()
                 binding.login.visibility = View.VISIBLE
                 binding.logout.visibility = View.GONE
                 binding.loginStatus.setText(R.string.not_logged_in)
@@ -107,10 +119,31 @@ class LoginFragment : BottomSheetDialogFragment() {
 
         binding.login.setOnClickListener {
             lifecycleScope.launch {
+
                 val authCoroutine = TMDbAuthV4(requireContext())
                 val accessToken = authCoroutine.authenticate()
+
                 if (accessToken != null) {
-                    preferences.edit().putString("access_token", accessToken).apply()
+
+                    preferences.edit()
+                        .putString("access_token", accessToken)
+                        .putBoolean("is_logged_in", true)
+                        .putLong("last_login_time", System.currentTimeMillis())
+                        .apply()
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Login successful",
+                        Toast.LENGTH_SHORT
+                    ).show()
+
+                } else {
+
+                    Toast.makeText(
+                        requireContext(),
+                        "Login failed",
+                        Toast.LENGTH_SHORT
+                    ).show()
                 }
             }
         }
