@@ -172,7 +172,7 @@ class MainActivity : BaseActivity() {
 
         context = this
 
-        val preferences = PreferenceManager.getDefaultSharedPreferences(this)
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         val isLoggedIn = preferences.getBoolean("is_logged_in", false)
         val loginProvider = preferences.getString("login_provider", "Unknown")
@@ -372,6 +372,8 @@ class MainActivity : BaseActivity() {
         mShowLinearLayoutManager = mShowGridView
 
         binding.searchResultsRecyclerView.adapter = mHomeSearchShowAdapter
+
+        preferences = PreferenceManager.getDefaultSharedPreferences(this)
 
         setupSearchView()
 
